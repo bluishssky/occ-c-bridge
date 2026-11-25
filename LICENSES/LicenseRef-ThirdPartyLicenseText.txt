@@ -1,0 +1,4 @@
+The files under third_party/licenses/ reproduce, verbatim, the license
+texts of third-party components used by this project.  Each text remains
+under its own license, as stated in THIRD_PARTY_NOTICES.md.  This
+LicenseRef is used only to mark those reproduction files in REUSE metadata.

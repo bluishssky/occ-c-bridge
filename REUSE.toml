@@ -1,0 +1,21 @@
+version = 1
+SPDX-PackageName = "occ-c-bridge"
+SPDX-PackageDownloadLocation = "https://github.com/bluishssky/occ-c-bridge"
+
+[[annotations]]
+path = [".gitattributes", ".gitignore", "NOTICE", "README.md"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Yonghua Liao"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = ["tests/third_party/doctest.h", "tests/third_party/LICENSE.doctest.txt"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2016-2023 Viktor Kirilov"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = ["third_party/licenses/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "See the respective license text"
+SPDX-License-Identifier = "LicenseRef-ThirdPartyLicenseText"

@@ -1,0 +1,25 @@
+occ-c-bridge
+Copyright (c) 2026 Yonghua Liao
+
+This product uses the following third-party components:
+
+- Open CASCADE Technology (OCCT) 7.7.0, licensed under the GNU Lesser
+  General Public License version 2.1 with the Open CASCADE exception.
+  This software is based in part on the work of Open CASCADE Technology.
+- oneAPI Threading Building Blocks (oneTBB) 2021.5, licensed under the
+  Apache License, Version 2.0. Copyright (c) Intel Corporation.
+- FreeType 2.5.5, licensed under the FreeType License (FTL).
+  Portions of this software are copyright © 2006 The FreeType Project
+  (https://freetype.org). All rights reserved.
+- doctest 2.5.0, licensed under the MIT License (Copyright (c) 2016-2023
+  Viktor Kirilov).
+
+Full license texts and attribution: see THIRD_PARTY_NOTICES.md and
+third_party/licenses/. The project itself is licensed under the Apache
+License, Version 2.0 (see LICENSE).
+
+Open CASCADE Technology: https://dev.opencascade.org/
+GNU LGPL 2.1: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+oneTBB: https://github.com/oneapi-src/oneTBB
+FreeType: https://freetype.org/
+doctest: https://github.com/doctest/doctest
