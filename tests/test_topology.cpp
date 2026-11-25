@@ -228,3 +228,33 @@ TEST_CASE("explorer: count faces and edges of a box") {
 
     ocb_shape_release(box);
 }
+
+TEST_CASE("explorer: invalid explorer handles return error, no crash") {
+    bool more = true;
+    OcbFace face = OCB_INVALID;
+    OcbEdge edge = OCB_INVALID;
+    OcbShape wire = OCB_INVALID;
+
+    // invalid (zero) handle
+    CHECK(ocb_explorer_more(OCB_INVALID, &more) == OCB_ERR_INVALID_HANDLE);
+    CHECK(ocb_explorer_current_face(OCB_INVALID, &face) == OCB_ERR_INVALID_HANDLE);
+    CHECK(ocb_explorer_current_edge(OCB_INVALID, &edge) == OCB_ERR_INVALID_HANDLE);
+    CHECK(ocb_explorer_current_wire(OCB_INVALID, &wire) == OCB_ERR_INVALID_HANDLE);
+    ocb_explorer_next(OCB_INVALID);   // no-op, must not crash
+
+    // null out pointer
+    OcbShape box = OCB_INVALID;
+    REQUIRE(ocb_shape_make_box(ocb_point_xyz(0, 0, 0), 1, 1, 1, &box) == OCB_OK);
+    OcbExplorer exp = OCB_INVALID;
+    REQUIRE(ocb_explorer_new_faces(box, &exp) == OCB_OK);
+    CHECK(ocb_explorer_more(exp, nullptr) == OCB_ERR_INVALID_HANDLE);
+    CHECK(ocb_explorer_current_face(exp, nullptr) == OCB_ERR_INVALID_HANDLE);
+
+    // released handle
+    ocb_explorer_release(exp);
+    CHECK(ocb_explorer_more(exp, &more) == OCB_ERR_INVALID_HANDLE);
+    CHECK(ocb_explorer_current_edge(exp, &edge) == OCB_ERR_INVALID_HANDLE);
+    ocb_explorer_next(exp);   // no-op, must not crash
+
+    ocb_shape_release(box);
+}

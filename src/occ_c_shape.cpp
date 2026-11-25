@@ -4,6 +4,8 @@
 #include "occ_c_bridge.h"
 #include "handle_table.h"
 
+#include <memory>
+
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
@@ -1243,45 +1245,46 @@ OcbStatus OCB_CALL ocb_explorer_new_wires(OcbShape shape, OcbExplorer* out) {
 }
 
 OcbStatus OCB_CALL ocb_explorer_more(OcbExplorer exp, bool* out) {
-    TopExp_Explorer* e = table().get<std::shared_ptr<TopExp_Explorer>>(exp)->get();
-    if (!out || !e) {
+    auto* holder = table().get<std::shared_ptr<TopExp_Explorer>>(exp);
+    if (!out || !holder || !*holder) {
         setError(OCB_ERR_INVALID_HANDLE, "invalid explorer handle");
         return OCB_ERR_INVALID_HANDLE;
     }
     clearError();
-    *out = e->More();
+    *out = (*holder)->More();
     return OCB_OK;
 }
 
 void OCB_CALL ocb_explorer_next(OcbExplorer exp) {
-    if (TopExp_Explorer* e = table().get<std::shared_ptr<TopExp_Explorer>>(exp)->get()) {
-        e->Next();
+    auto* holder = table().get<std::shared_ptr<TopExp_Explorer>>(exp);
+    if (holder && *holder) {
+        (*holder)->Next();
     }
 }
 
 OcbStatus OCB_CALL ocb_explorer_current_face(OcbExplorer exp, OcbFace* out) {
-    TopExp_Explorer* e = table().get<std::shared_ptr<TopExp_Explorer>>(exp)->get();
-    if (!out || !e) {
+    auto* holder = table().get<std::shared_ptr<TopExp_Explorer>>(exp);
+    if (!out || !holder || !*holder) {
         setError(OCB_ERR_INVALID_HANDLE, "invalid explorer handle");
         return OCB_ERR_INVALID_HANDLE;
     }
     clearError();
     try {
-        *out = table().add(TopoDS_Shape(TopoDS::Face(e->Current())));
+        *out = table().add(TopoDS_Shape(TopoDS::Face((*holder)->Current())));
         return OCB_OK;
     }
     OCB_CATCH_RETURN(OCB_ERR_OCC_EXCEPTION)
 }
 
 OcbStatus OCB_CALL ocb_explorer_current_edge(OcbExplorer exp, OcbEdge* out) {
-    TopExp_Explorer* e = table().get<std::shared_ptr<TopExp_Explorer>>(exp)->get();
-    if (!out || !e) {
+    auto* holder = table().get<std::shared_ptr<TopExp_Explorer>>(exp);
+    if (!out || !holder || !*holder) {
         setError(OCB_ERR_INVALID_HANDLE, "invalid explorer handle");
         return OCB_ERR_INVALID_HANDLE;
     }
     clearError();
     try {
-        *out = table().add(TopoDS_Shape(TopoDS::Edge(e->Current())));
+        *out = table().add(TopoDS_Shape(TopoDS::Edge((*holder)->Current())));
         return OCB_OK;
     }
     OCB_CATCH_RETURN(OCB_ERR_OCC_EXCEPTION)
@@ -1292,14 +1295,14 @@ void OCB_CALL ocb_explorer_release(OcbExplorer exp) {
 }
 
 OcbStatus OCB_CALL ocb_explorer_current_wire(OcbExplorer exp, OcbShape* out) {
-    TopExp_Explorer* e = table().get<std::shared_ptr<TopExp_Explorer>>(exp)->get();
-    if (!out || !e) {
+    auto* holder = table().get<std::shared_ptr<TopExp_Explorer>>(exp);
+    if (!out || !holder || !*holder) {
         setError(OCB_ERR_INVALID_HANDLE, "invalid explorer handle");
         return OCB_ERR_INVALID_HANDLE;
     }
     clearError();
     try {
-        *out = table().add(TopoDS_Shape(TopoDS::Wire(e->Current())));
+        *out = table().add(TopoDS_Shape(TopoDS::Wire((*holder)->Current())));
         return OCB_OK;
     }
     OCB_CATCH_RETURN(OCB_ERR_OCC_EXCEPTION)
@@ -1507,9 +1510,9 @@ OcbStatus OCB_CALL ocb_gprops_volume(OcbShape shape, OcbGProps* out) {
     }
     clearError();
     try {
-        const OcbGProps h = table().add(std::shared_ptr<GProp_GProps>(new GProp_GProps()));
-        BRepGProp::VolumeProperties(*s, *table().get<std::shared_ptr<GProp_GProps>>(h)->get());
-        *out = h;
+        auto props = std::make_shared<GProp_GProps>();
+        BRepGProp::VolumeProperties(*s, *props);
+        *out = table().add(props);
         return OCB_OK;
     }
     OCB_CATCH_RETURN(OCB_ERR_OCC_EXCEPTION)
@@ -1523,9 +1526,9 @@ OcbStatus OCB_CALL ocb_gprops_linear(OcbShape shape, OcbGProps* out) {
     }
     clearError();
     try {
-        const OcbGProps h = table().add(std::shared_ptr<GProp_GProps>(new GProp_GProps()));
-        BRepGProp::LinearProperties(*s, *table().get<std::shared_ptr<GProp_GProps>>(h)->get());
-        *out = h;
+        auto props = std::make_shared<GProp_GProps>();
+        BRepGProp::LinearProperties(*s, *props);
+        *out = table().add(props);
         return OCB_OK;
     }
     OCB_CATCH_RETURN(OCB_ERR_OCC_EXCEPTION)
@@ -1539,33 +1542,33 @@ OcbStatus OCB_CALL ocb_gprops_surface(OcbShape shape, OcbGProps* out) {
     }
     clearError();
     try {
-        const OcbGProps h = table().add(std::shared_ptr<GProp_GProps>(new GProp_GProps()));
-        BRepGProp::SurfaceProperties(*s, *table().get<std::shared_ptr<GProp_GProps>>(h)->get());
-        *out = h;
+        auto props = std::make_shared<GProp_GProps>();
+        BRepGProp::SurfaceProperties(*s, *props);
+        *out = table().add(props);
         return OCB_OK;
     }
     OCB_CATCH_RETURN(OCB_ERR_OCC_EXCEPTION)
 }
 
 OcbStatus OCB_CALL ocb_gprops_mass(OcbGProps props, double* out) {
-    GProp_GProps* p = table().get<std::shared_ptr<GProp_GProps>>(props)->get();
-    if (!out || !p) {
+    auto* holder = table().get<std::shared_ptr<GProp_GProps>>(props);
+    if (!out || !holder || !*holder) {
         setError(OCB_ERR_INVALID_HANDLE, "invalid gprops handle");
         return OCB_ERR_INVALID_HANDLE;
     }
     clearError();
-    *out = p->Mass();
+    *out = (*holder)->Mass();
     return OCB_OK;
 }
 
 OcbStatus OCB_CALL ocb_gprops_center_of_mass(OcbGProps props, OcbPnt* out) {
-    GProp_GProps* p = table().get<std::shared_ptr<GProp_GProps>>(props)->get();
-    if (!out || !p) {
+    auto* holder = table().get<std::shared_ptr<GProp_GProps>>(props);
+    if (!out || !holder || !*holder) {
         setError(OCB_ERR_INVALID_HANDLE, "invalid gprops handle");
         return OCB_ERR_INVALID_HANDLE;
     }
     clearError();
-    *out = toOcb(p->CentreOfMass());
+    *out = toOcb((*holder)->CentreOfMass());
     return OCB_OK;
 }
 

@@ -7,6 +7,18 @@ All notable changes to this project are documented in this file.
 The project follows [Semantic Versioning](https://semver.org/); within a major
 version the C ABI is append-only.
 
+## Unreleased
+
+### Fixed
+
+- Invalid or released handles no longer crash `ocb_explorer_*` / `ocb_gprops_*`:
+  they now return `OCB_ERR_INVALID_HANDLE` (`ocb_explorer_next` is a no-op)
+  instead of dereferencing a null table entry.
+- `ocb_gprops_volume/linear/surface` compute properties before registering the
+  handle, so a failed computation no longer leaves a dead handle in the table.
+- Regression tests added for invalid / released / wrong-type handles and null
+  out-pointers.
+
 ## 1.5.0 — Initial open-source release (2026-11-24)
 
 > Versions 1.0 through 1.4 were internal iterations and were never published.

@@ -105,3 +105,31 @@ TEST_CASE("props: linear properties of an edge") {
     ocb_gprops_release(props);
     ocb_shape_release(edge);
 }
+
+TEST_CASE("props: invalid gprops handles return error, no crash") {
+    double mass = 0.0;
+    OcbPnt com = ocb_point_xyz(0, 0, 0);
+
+    // invalid (zero) handle
+    CHECK(ocb_gprops_mass(OCB_INVALID, &mass) == OCB_ERR_INVALID_HANDLE);
+    CHECK(ocb_gprops_center_of_mass(OCB_INVALID, &com) == OCB_ERR_INVALID_HANDLE);
+
+    OcbShape box = makeBox(1.0, 1.0, 1.0);
+    OcbGProps props = OCB_INVALID;
+    REQUIRE(ocb_gprops_volume(box, &props) == OCB_OK);
+
+    // null out pointer
+    CHECK(ocb_gprops_mass(props, nullptr) == OCB_ERR_INVALID_HANDLE);
+    CHECK(ocb_gprops_center_of_mass(props, nullptr) == OCB_ERR_INVALID_HANDLE);
+
+    // released handle
+    ocb_gprops_release(props);
+    CHECK(ocb_gprops_mass(props, &mass) == OCB_ERR_INVALID_HANDLE);
+    CHECK(ocb_gprops_center_of_mass(props, &com) == OCB_ERR_INVALID_HANDLE);
+
+    // valid handle of a different type (shape where gprops expected)
+    CHECK(ocb_gprops_mass(box, &mass) == OCB_ERR_INVALID_HANDLE);
+    CHECK(ocb_gprops_center_of_mass(box, &com) == OCB_ERR_INVALID_HANDLE);
+
+    ocb_shape_release(box);
+}
