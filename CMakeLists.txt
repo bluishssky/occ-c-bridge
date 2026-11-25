@@ -161,6 +161,24 @@ if(OCB_BUILD_TESTS)
     endif()
 
     if(WIN32)
+        # Dynamic OCCT's TKService hard-imports these optional third-party
+        # runtimes (image codecs / media / VR). Copy the DLLs when the OCCT
+        # distribution ships them, so the test executable starts without
+        # manual PATH setup. Static OCCT builds do not need them.
+        file(GLOB OCB_TEST_EXTRA_RUNTIME_DLLS
+            "${OCB_3RDPARTY_ROOT}/ffmpeg*/bin/*.dll"
+            "${OCB_3RDPARTY_ROOT}/freeimage*/bin/*.dll"
+            "${OCB_3RDPARTY_ROOT}/openvr*/bin/*.dll"
+            "${OCB_3RDPARTY_ROOT}/openvr*/bin/*/*.dll")
+
+        set(OCB_TEST_EXTRA_COPY_CMD)
+        if(OCB_TEST_EXTRA_RUNTIME_DLLS)
+            list(APPEND OCB_TEST_EXTRA_COPY_CMD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    ${OCB_TEST_EXTRA_RUNTIME_DLLS}
+                    "$<TARGET_FILE_DIR:occ_c_bridge_tests>")
+        endif()
+
         add_custom_command(TARGET occ_c_bridge_tests POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory
                 "${OCB_OCCT_BIN_DIR}"
@@ -171,6 +189,7 @@ if(OCB_BUILD_TESTS)
             COMMAND ${CMAKE_COMMAND} -E copy_directory
                 "${OCB_3RDPARTY_ROOT}/freetype-2.5.5-vc14-64/bin"
                 "$<TARGET_FILE_DIR:occ_c_bridge_tests>"
+            ${OCB_TEST_EXTRA_COPY_CMD}
             COMMENT "Copy OpenCASCADE runtime DLLs for tests"
         )
     endif()
