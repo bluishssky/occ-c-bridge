@@ -179,10 +179,17 @@ if(OCB_BUILD_TESTS)
                     "$<TARGET_FILE_DIR:occ_c_bridge_tests>")
         endif()
 
+        # Static OCCT has no bin dir; only copy the OCCT runtime when present.
+        set(OCB_TEST_OCCT_BIN_CMD)
+        if(OCB_OCCT_BIN_DIR)
+            list(APPEND OCB_TEST_OCCT_BIN_CMD
+                COMMAND ${CMAKE_COMMAND} -E copy_directory
+                    "${OCB_OCCT_BIN_DIR}"
+                    "$<TARGET_FILE_DIR:occ_c_bridge_tests>")
+        endif()
+
         add_custom_command(TARGET occ_c_bridge_tests POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_directory
-                "${OCB_OCCT_BIN_DIR}"
-                "$<TARGET_FILE_DIR:occ_c_bridge_tests>"
+            ${OCB_TEST_OCCT_BIN_CMD}
             COMMAND ${CMAKE_COMMAND} -E copy_directory
                 "${OCB_3RDPARTY_ROOT}/tbb_2021.5-vc14-64/bin"
                 "$<TARGET_FILE_DIR:occ_c_bridge_tests>"
