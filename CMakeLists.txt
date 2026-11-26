@@ -2,7 +2,7 @@
 # Author: Yonghua Liao
 # SPDX-License-Identifier: Apache-2.0
 cmake_minimum_required(VERSION 3.20)
-project(occ_c_bridge VERSION 1.5.0 LANGUAGES CXX)
+project(occ_c_bridge VERSION 1.5.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -131,6 +131,7 @@ if(OCB_BUILD_TESTS)
         tests/test_primitives.cpp
         tests/test_topology.cpp
         tests/test_mesh_props.cpp
+        tests/test_bool_glue.cpp
         tests/test_io.cpp
         tests/test_ais.cpp
         tests/test_ocaf2.cpp

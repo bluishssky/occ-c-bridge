@@ -40,7 +40,7 @@ namespace {
 extern "C" {
 
 const char* OCB_CALL ocb_version(void) {
-    return "1.5.0";
+    return "1.5.1";
 }
 
 OcbStatus OCB_CALL ocb_last_status(void) {

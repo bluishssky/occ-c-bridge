@@ -7,7 +7,19 @@ All notable changes to this project are documented in this file.
 The project follows [Semantic Versioning](https://semver.org/); within a major
 version the C ABI is append-only.
 
-## Unreleased
+## 1.5.1 (2026-11-26)
+
+### Added
+
+- Glue-aware boolean operations `ocb_bool_cut_glue` / `ocb_bool_fuse_glue` /
+  `ocb_bool_common_glue` (`glue`: 0 = GlueOff, 1 = GlueShift, 2 = GlueFull).
+  GlueShift gives BOP the fast path for shared / co-planar faces and avoids
+  sliver faces on coplanar cuts (CADTool 3D cavity/via trimming).
+- Regression suite `tests/test_bool_glue.cpp` (7 cases): coplanar
+  through-cavity cut with identical volumes across glue modes, face-count
+  regression gate (measured snapshot Off=10 / Shift=10), GlueFull
+  partially-glued contract, invalid glue values, null out / invalid handles,
+  analytic fuse/common volumes.
 
 ### Fixed
 

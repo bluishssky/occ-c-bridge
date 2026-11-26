@@ -17,6 +17,7 @@
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
 #include <BRepAlgoAPI_Common.hxx>
+#include <BOPAlgo_GlueEnum.hxx>
 #include <BRepExtrema_DistShapeShape.hxx>
 #include <BRepClass3d_SolidClassifier.hxx>
 #include <BRepFilletAPI_MakeFillet.hxx>
@@ -320,6 +321,106 @@ OcbStatus OCB_CALL ocb_bool_common_ex2(OcbShape a, OcbShape b, double fuzzy, boo
         algo.SetFuzzyValue(fuzzy);
         algo.SetRunParallel(parallel ? Standard_True : Standard_False);
         algo.SetUseOBB(useObb ? Standard_True : Standard_False);
+        algo.Build();
+        if (!algo.IsDone()) {
+            setError(OCB_ERR_OCC_EXCEPTION, "common failed");
+            return OCB_ERR_OCC_EXCEPTION;
+        }
+        *out = table().add(algo.Shape());
+        return OCB_OK;
+    }
+    OCB_CATCH_RETURN(OCB_ERR_OCC_EXCEPTION)
+}
+
+/* v1.5.1: glue-aware booleans for shared / co-planar faces. BOPAlgo_GlueShift
+   gives BOP the fast path for coincident face groups and avoids sliver faces
+   on coplanar cuts (CADTool 3D cavity/via trimming). glue: 0=Off, 1=Shift,
+   2=Full (Full requires all shared faces fully coincident). */
+
+namespace {
+
+bool glueEnumValid(int glue) {
+    return glue >= 0 && glue <= 2;
+}
+
+} // namespace
+
+OcbStatus OCB_CALL ocb_bool_cut_glue(OcbShape target, OcbShape tool, double fuzzy, int glue,
+                                     bool parallel, OcbShape* out) {
+    TopoDS_Shape* sa = table().get<TopoDS_Shape>(target);
+    TopoDS_Shape* sb = table().get<TopoDS_Shape>(tool);
+    if (!out || !sa || !sb) {
+        setError(OCB_ERR_INVALID_HANDLE, "invalid shape handle");
+        return OCB_ERR_INVALID_HANDLE;
+    }
+    if (!glueEnumValid(glue)) {
+        setError(OCB_ERR_INVALID_ARG, "glue must be 0..2");
+        return OCB_ERR_INVALID_ARG;
+    }
+    clearError();
+    try {
+        BRepAlgoAPI_Cut algo(*sa, *sb);
+        algo.SetFuzzyValue(fuzzy);
+        algo.SetRunParallel(parallel ? Standard_True : Standard_False);
+        algo.SetGlue(static_cast<BOPAlgo_GlueEnum>(glue));
+        algo.Build();
+        if (!algo.IsDone() || algo.Shape().IsNull()) {
+            setError(OCB_ERR_OCC_EXCEPTION, "cut failed");
+            return OCB_ERR_OCC_EXCEPTION;
+        }
+        *out = table().add(algo.Shape());
+        return OCB_OK;
+    }
+    OCB_CATCH_RETURN(OCB_ERR_OCC_EXCEPTION)
+}
+
+OcbStatus OCB_CALL ocb_bool_fuse_glue(OcbShape a, OcbShape b, double fuzzy, int glue,
+                                      bool parallel, OcbShape* out) {
+    TopoDS_Shape* sa = table().get<TopoDS_Shape>(a);
+    TopoDS_Shape* sb = table().get<TopoDS_Shape>(b);
+    if (!out || !sa || !sb) {
+        setError(OCB_ERR_INVALID_HANDLE, "invalid shape handle");
+        return OCB_ERR_INVALID_HANDLE;
+    }
+    if (!glueEnumValid(glue)) {
+        setError(OCB_ERR_INVALID_ARG, "glue must be 0..2");
+        return OCB_ERR_INVALID_ARG;
+    }
+    clearError();
+    try {
+        BRepAlgoAPI_Fuse algo(*sa, *sb);
+        algo.SetFuzzyValue(fuzzy);
+        algo.SetRunParallel(parallel ? Standard_True : Standard_False);
+        algo.SetGlue(static_cast<BOPAlgo_GlueEnum>(glue));
+        algo.Build();
+        if (!algo.IsDone() || algo.Shape().IsNull()) {
+            setError(OCB_ERR_OCC_EXCEPTION, "fuse failed");
+            return OCB_ERR_OCC_EXCEPTION;
+        }
+        *out = table().add(algo.Shape());
+        return OCB_OK;
+    }
+    OCB_CATCH_RETURN(OCB_ERR_OCC_EXCEPTION)
+}
+
+OcbStatus OCB_CALL ocb_bool_common_glue(OcbShape a, OcbShape b, double fuzzy, int glue,
+                                        bool parallel, OcbShape* out) {
+    TopoDS_Shape* sa = table().get<TopoDS_Shape>(a);
+    TopoDS_Shape* sb = table().get<TopoDS_Shape>(b);
+    if (!out || !sa || !sb) {
+        setError(OCB_ERR_INVALID_HANDLE, "invalid shape handle");
+        return OCB_ERR_INVALID_HANDLE;
+    }
+    if (!glueEnumValid(glue)) {
+        setError(OCB_ERR_INVALID_ARG, "glue must be 0..2");
+        return OCB_ERR_INVALID_ARG;
+    }
+    clearError();
+    try {
+        BRepAlgoAPI_Common algo(*sa, *sb);
+        algo.SetFuzzyValue(fuzzy);
+        algo.SetRunParallel(parallel ? Standard_True : Standard_False);
+        algo.SetGlue(static_cast<BOPAlgo_GlueEnum>(glue));
         algo.Build();
         if (!algo.IsDone()) {
             setError(OCB_ERR_OCC_EXCEPTION, "common failed");

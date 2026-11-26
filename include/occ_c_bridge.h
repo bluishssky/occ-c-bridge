@@ -180,6 +180,19 @@ OCB_API OcbStatus OCB_CALL ocb_bool_common_ex(OcbShape a, OcbShape b, double fuz
 /* same as common_ex, plus OBB control (thin/co-planar shallow embedding needs true) */
 OCB_API OcbStatus OCB_CALL ocb_bool_common_ex2(OcbShape a, OcbShape b, double fuzzy, bool parallel, bool useObb, OcbShape* out);
 
+/* --- v1.5.1 glue-aware booleans (shared / co-planar faces) ----------------
+ * glue: 0 = BOPAlgo_GlueOff (default behaviour), 1 = BOPAlgo_GlueShift
+ * (fast path for shared / co-planar faces, avoids sliver faces on coplanar
+ * cuts), 2 = BOPAlgo_GlueFull (requires all shared faces fully coincident).
+ * Other parameters (fuzzy value, parallel mode) match the *_ex variants.
+ * ------------------------------------------------------------------ */
+OCB_API OcbStatus OCB_CALL ocb_bool_cut_glue(
+    OcbShape target, OcbShape tool, double fuzzy, int glue, bool parallel, OcbShape* out);
+OCB_API OcbStatus OCB_CALL ocb_bool_fuse_glue(
+    OcbShape a, OcbShape b, double fuzzy, int glue, bool parallel, OcbShape* out);
+OCB_API OcbStatus OCB_CALL ocb_bool_common_glue(
+    OcbShape a, OcbShape b, double fuzzy, int glue, bool parallel, OcbShape* out);
+
 /* ------------------------------------------------------------------
  * 几何分析（干涉检测）
  * ------------------------------------------------------------------ */
